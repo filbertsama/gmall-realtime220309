@@ -34,6 +34,7 @@ public class Flink05_Process_KeyBy {
         stream
             .keyBy(WaterSensor::getId)
             .process(new KeyedProcessFunction<String, WaterSensor, String>() {
+               
                 Map<String, Integer> map = new HashMap<>();
                 @Override
                 public void processElement(WaterSensor value,
