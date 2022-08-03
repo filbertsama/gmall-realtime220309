@@ -16,7 +16,7 @@ import java.util.List;
  * @Author lzc
  * @Date 2022/8/3 14:18
  */
-public class Flink01_Window {
+public class Flink01_Window_Time {
     public static void main(String[] args) {
         Configuration conf = new Configuration();
         conf.setInteger("rest.port", 2000);
