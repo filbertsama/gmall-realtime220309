@@ -18,12 +18,12 @@ import java.util.List;
  * @Author lzc
  * @Date 2022/8/5 10:17
  */
-public class Flink03_Watermark_2 {
+public class Flink04_AllowLate {
     public static void main(String[] args) {
         Configuration conf = new Configuration();
         conf.setInteger("rest.port", 2000);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
-        env.setParallelism(2);
+        env.setParallelism(1);
         
         env.getConfig().setAutoWatermarkInterval(2000);
         
@@ -42,11 +42,14 @@ public class Flink03_Watermark_2 {
                 WatermarkStrategy
                     .<WaterSensor>forBoundedOutOfOrderness(Duration.ofSeconds(3))
                     .withTimestampAssigner((ele, ts) -> ele.getTs())
-                    .withIdleness(Duration.ofSeconds(5))  // 当某个并行度水印超过5s没有更新, 则以其他为准
+                    //.withIdleness(Duration.ofSeconds(5))  // 当某个并行度水印超过5s没有更新, 则以其他为准
             )
             .keyBy(WaterSensor::getId)
             .window(TumblingEventTimeWindows.of(Time.seconds(5)))
+            // 允许迟到: 当到了窗口的关闭时间,先对窗口内的元素做计算,窗口不管. 过2s后窗口真正的关闭
+            .allowedLateness(Time.seconds(2))
             .process(new ProcessWindowFunction<WaterSensor, String, String, TimeWindow>() {
+                // 在允许迟到期间, 每来一个属于这个窗口的元素, 这个方法就会执行
                 @Override
                 public void process(String key,
                                     Context ctx,
