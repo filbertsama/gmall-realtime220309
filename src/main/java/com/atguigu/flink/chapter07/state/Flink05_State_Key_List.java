@@ -75,7 +75,6 @@ public class Flink05_State_Key_List {
                     top3VcState.update(list);
     
                     out.collect(list.toString());
-    
                 }
             })
             .print();
