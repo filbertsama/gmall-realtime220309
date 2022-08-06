@@ -24,6 +24,7 @@ public class Flink01_Watermark_1 {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         env.setParallelism(1);
         
+        
         env.getConfig().setAutoWatermarkInterval(2000);
         
         
