@@ -6,7 +6,9 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
@@ -29,7 +31,7 @@ public class Flink11_Kafka_Flink_Kafka {
         System.setProperty("HADOOP_USER_NAME", "atguigu");
         
         Configuration conf = new Configuration();
-        conf.setInteger("rest.port", 2000);
+        conf.setInteger("rest.port", 5000);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         env.setParallelism(1);
         
@@ -55,12 +57,14 @@ public class Flink11_Kafka_Flink_Kafka {
         Properties sourceProps = new Properties();
         sourceProps.put("bootstrap.servers", "hadoop162:9092,hadoop163:9092,hadoop164:9092");
         sourceProps.put("group.id", "Flink11_Kafka_Flink_Kafka");
+        // 防止重复读取那些未提交的数据
+        sourceProps.put("isolation.level", "read_committed"); // 消费开启事务的topic的时候, 只消费已提交的
         
         Properties sinkProps = new Properties();
         sinkProps.put("bootstrap.servers", "hadoop162:9092,hadoop163:9092,hadoop164:9092");
         sinkProps.put("transaction.timeout.ms", 15 * 60 * 1000);
-        
-        env
+    
+        SingleOutputStreamOperator<Tuple2<String, Long>> stream = env
             .addSource(
                 new FlinkKafkaConsumer<String>("s1", new SimpleStringSchema(), sourceProps)
                     .setStartFromLatest() // 当启动的时候, 如果没有消费记录, 从这个地方开始消费.
@@ -74,13 +78,15 @@ public class Flink11_Kafka_Flink_Kafka {
                 }
             })
             .keyBy(t -> t.f0)
-            .sum(1)
+            .sum(1);
+        stream
             .addSink(new FlinkKafkaProducer<Tuple2<String, Long>>(
                 "default", // 没用
                 new KafkaSerializationSchema<Tuple2<String, Long>>() {
                     @Override
                     public ProducerRecord<byte[], byte[]> serialize(Tuple2<String, Long> element,
                                                                     @Nullable Long timestamp) {
+                        
                         return new ProducerRecord<>("s2", (element.f0 + "_" + element.f1).getBytes(StandardCharsets.UTF_8));
                     }
                 },
@@ -88,7 +94,15 @@ public class Flink11_Kafka_Flink_Kafka {
                 EXACTLY_ONCE
             ));
         
-        
+        stream.addSink(new SinkFunction<Tuple2<String, Long>>() {
+            @Override
+            public void invoke(Tuple2<String, Long> value,
+                               Context context) throws Exception {
+                if (value.f0.contains("x")) {
+                    throw new RuntimeException("手动抛出异常");
+                }
+            }
+        });
         try {
             env.execute();
         } catch (Exception e) {
