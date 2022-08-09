@@ -22,7 +22,7 @@ public class Flink04_Project_High_Ads {
         Configuration conf = new Configuration();
         conf.setInteger("rest.port", 2000);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
-        env.setParallelism(1);
+        env.setParallelism(2);
         
         SingleOutputStreamOperator<String> main = env
             .readTextFile("input/AdClickLog.csv")
@@ -56,8 +56,12 @@ public class Flink04_Project_High_Ads {
                 public void processElement(AdsClickLog log,
                                            Context ctx,
                                            Collector<String> out) throws Exception {
+                    
                     // 如何判断跨天
                     String today = AtguiguUtil.toDate(log.getTimestamp());
+                    if (log.getAdsId() == 1715) {
+                        System.out.println(today);
+                    }
     
                     // 今天和状态中的日期不等
                     if (!today.equals(yesterdayState.value())) {
@@ -87,7 +91,7 @@ public class Flink04_Project_High_Ads {
                             
                         }
                     } else {
-                        out.collect(msg);
+                        //out.collect(msg);
                     }
                 }
             });
