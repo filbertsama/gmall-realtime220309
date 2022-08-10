@@ -43,9 +43,9 @@ public class Flink05_SQL_File {
                             " 'format' = 'json' " +
                             ")");
         
-        //        result.executeInsert("abc");  // 按照顺序写入的, 不交易字段名
+        //        result.executeInsert("abc");  // 按照顺序写入的, 不校验字段名
         
-        tEnv.executeSql("insert into abc select * from " + result);
+        tEnv.executeSql("insert into abc select * from " + result);  // 同上
         
         
     }
