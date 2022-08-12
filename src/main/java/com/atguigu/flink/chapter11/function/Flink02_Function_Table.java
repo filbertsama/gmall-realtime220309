@@ -10,9 +10,6 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.functions.TableFunction;
 
-import static org.apache.flink.table.api.Expressions.$;
-import static org.apache.flink.table.api.Expressions.call;
-
 /**
  * @Author lzc
  * @Date 2022/8/12 14:13
@@ -41,15 +38,56 @@ public class Flink02_Function_Table {
         // 1.2 先注册后使用
         tEnv.createFunction("my_split", MySplit.class);
         
-        table
+        /*table
             .joinLateral(call("my_split", $("id")))  // 把传入的字符串id的值, 给做成了表
             .select($("id"), $("word"), $("len"))
             .execute()
-            .print();
+            .print();*/
+        
+        /*table
+            .leftOuterJoinLateral(call("my_split", $("id")))  // 把传入的字符串id的值, 给做成了表
+            .select($("id"), $("word"), $("len"))
+            .execute()
+            .print();*/
         // 2. 在sql语句中使用
         // 一定要先注册临时表, 才能在sql中使用
+       /* tEnv.sqlQuery("select " +
+                          " id, " +
+                          " word, " +
+                          " len " +
+                          "from sensor " +
+                          "join lateral table(my_split(id)) on true ")
+            .execute()
+            .print();*/
+        /*tEnv.sqlQuery("select " +
+                          " id, " +
+                          " w, " +
+                          " l " +
+                          "from sensor " +
+                          "join lateral table(my_split(id)) as aaa(w, l) on true ")// aaa是炸出来的临时表名
+            .execute()
+            .print();*/
         
-        
+        // select ...  from a join b on a.id=b.id  内连接
+        // select ...  from a,b where a.id=b.id 内连接
+    
+       /* tEnv.sqlQuery("select " +
+                          " id, " +
+                          " word, " +
+                          " len " +
+                          "from sensor " +
+                          ", lateral table(my_split(id)) ")
+            .execute()
+            .print();*/
+       
+       tEnv.sqlQuery("select " +
+                          " id, " +
+                          " w, " +
+                          " l " +
+                          "from sensor " +
+                          "left  join lateral table(my_split(id)) as aaa(w, l) on true ")
+           .execute()
+           .print();
     }
     
     /*@FunctionHint(output = @DataTypeHint("row<word string, len int>"))
@@ -65,6 +103,10 @@ public class Flink02_Function_Table {
     
     public static class MySplit extends TableFunction<WordLen> {
         public void eval(String s) {
+            if (s.contains("atguigu")) {
+                return;
+            }
+            
             String[] words = s.split(" +");
             
             for (String word : words) {
@@ -76,7 +118,7 @@ public class Flink02_Function_Table {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class WordLen{
+    public static class WordLen {
         private String word;
         private Integer len;
     }
