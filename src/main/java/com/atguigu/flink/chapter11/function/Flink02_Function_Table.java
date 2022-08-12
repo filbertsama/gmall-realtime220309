@@ -30,9 +30,7 @@ public class Flink02_Function_Table {
             new WaterSensor("hello world hello", 5000L, 50)
         );
         
-        
         StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
-        
         
         Table table = tEnv.fromDataStream(stream);
         tEnv.createTemporaryView("sensor", table);
@@ -82,8 +80,6 @@ public class Flink02_Function_Table {
         private String word;
         private Integer len;
     }
-    
-    
 }
 /*
 "ab a c"
