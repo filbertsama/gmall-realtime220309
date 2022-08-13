@@ -2,11 +2,12 @@ package com.atguigu.flink.chapter07.window;
 
 import com.atguigu.flink.bean.WaterSensor;
 import com.atguigu.flink.util.AtguiguUtil;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
@@ -23,7 +24,8 @@ public class Flink03_Window_Process {
         env.setParallelism(1);
         
         env
-            .socketTextStream("hadoop162", 9999)
+//            .socketTextStream("hadoop162", 9999)
+            .readTextFile("input/sensor.txt")
             .map(line -> {
                 String[] data = line.split(",");
                 
@@ -33,8 +35,13 @@ public class Flink03_Window_Process {
                     Integer.valueOf(data[2])
                 );
             })
+            .assignTimestampsAndWatermarks(
+                WatermarkStrategy
+                    .<WaterSensor>forMonotonousTimestamps()
+                .withTimestampAssigner((ws, ts) -> ws.getTs())
+            )
             .keyBy(WaterSensor::getId)
-            .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
+            .window(SlidingEventTimeWindows.of(Time.seconds(5), Time.seconds(2)))
             //            .sum("vc")
             .reduce(
                 new ReduceFunction<WaterSensor>() {

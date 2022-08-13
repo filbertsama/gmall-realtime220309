@@ -26,7 +26,8 @@ public class Flink01_Window_Group_2 {
                 new WaterSensor("sensor_2", 3000L, 30),
                 new WaterSensor("sensor_1", 4000L, 40),
                 new WaterSensor("sensor_2", 5000L, 50),
-                new WaterSensor("sensor_1", 6001L, 60)
+                new WaterSensor("sensor_1", 6001L, 60),
+                new WaterSensor("sensor_1", 18000L, 60)
             )
             .assignTimestampsAndWatermarks(
                 WatermarkStrategy
@@ -51,17 +52,16 @@ public class Flink01_Window_Group_2 {
             .execute()
             .print();*/
     
-       /* tEnv.sqlQuery("select " +
+        tEnv.sqlQuery("select " +
                           " id, " +
-                          " hop_start(et, interval '2' second, interval '5' second) stt, " +
-                          " hop_end(et, interval '2' second, interval '5' second) edt, " +
+                          " hop_start(et, interval '5' second, interval '13' second) stt, " +
+                          " hop_end(et, interval '5' second, interval '13' second) edt, " +
                           " sum(vc) vc_sum " +
                           "from sensor " +
-                          "group by id, hop(et, interval '2' second, interval '5' second)")
+                          "group by id, hop(et, interval '5' second, interval '13' second)")
             .execute()
             .print();
-     */
-        tEnv.sqlQuery("select " +
+        /*tEnv.sqlQuery("select " +
                           " id, " +
                           " session_start(et, interval '2' second) stt, " +
                           " session_end(et, interval '2' second) edt, " +
@@ -69,7 +69,7 @@ public class Flink01_Window_Group_2 {
                           "from sensor " +
                           "group by id, session(et, interval '2' second)")
             .execute()
-            .print();
+            .print();*/
         
         
     }
