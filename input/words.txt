@@ -1,5 +1,6 @@
-hello world
-atguigu hello
-hello atguigu
-hello hello hello
-atguigu atguigu
+hello world kafka zookeeper kafka hive hive
+hello world hello world hello world hello world
+hadoop hadoop good flink hadoop
+zookeeper kafka flink flink
+hive flink kafka hbase flink
+hive spark
