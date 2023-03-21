@@ -50,6 +50,7 @@ public class Flink03_Window_Process {
                     public WaterSensor reduce(WaterSensor value1,
                                               WaterSensor value2) throws Exception {
                         System.out.println("Flink03_Window_Process.reduce");
+
                         value1.setVc(value1.getVc() + value2.getVc());
                         return value1;
                     }

@@ -41,7 +41,9 @@ public class Flink03_Table_Kafka {
             .createTemporaryTable("sensor");
     
     
-        Table table = tEnv.from("sensor").where($("vc").isGreater(10)).select("*");
+        Table table = tEnv.from("sensor")
+                .where($("vc")
+                        .isGreater(10)).select("*");
     
     
         tEnv

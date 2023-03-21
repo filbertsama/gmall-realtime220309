@@ -56,7 +56,7 @@ public class Flink02_State_Operator_Union_List {
             words.addAll(Arrays.asList(data));
             return words.toString();
         }
-    
+
         // 保存状态: 周期性的执行.
         // 每个并行度都会周期性的执行
         @Override

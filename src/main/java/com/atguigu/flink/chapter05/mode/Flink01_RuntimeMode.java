@@ -20,19 +20,19 @@ public class Flink01_RuntimeMode {
         
         env.setRuntimeMode(RuntimeExecutionMode.BATCH);
 //        env.setRuntimeMode(RuntimeExecutionMode.AUTOMATIC);
-    
+
         env
-//            .readTextFile("input/words.txt")
-            .socketTextStream("hadoop162", 9999)
+            .readTextFile("F:/class_package/flink/flink220309_2/input/words.txt")
+//            .socketTextStream("hadoop162", 9999)
             .flatMap(new FlatMapFunction<String, Tuple2<String, Long>>() {
                 @Override
                 public void flatMap(String line,
                                     Collector<Tuple2<String, Long>> out) throws Exception {
                     for (String word : line.split(" ")) {
-                    
+
                         out.collect(Tuple2.of(word, 1L));
                     }
-                
+
                 }
             })
             .keyBy(t -> t.f0)

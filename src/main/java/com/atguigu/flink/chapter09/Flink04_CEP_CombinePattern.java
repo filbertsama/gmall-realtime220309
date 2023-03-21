@@ -52,10 +52,10 @@ public class Flink04_CEP_CombinePattern {
                     return "sensor_1".equals(value.getId());
                 }
             })
-           // .next("s2")  // 严格连续
+            .next("s2")  // 严格连续
 //            .notNext("s2")  // 找sensor_1后面有数据,但是不是sensor_2
 //            .followedBy("s2")
-            .notFollowedBy("s2")
+//            .notFollowedBy("s2")
             .where(new SimpleCondition<WaterSensor>() {
                 @Override
                 public boolean filter(WaterSensor value) throws Exception {

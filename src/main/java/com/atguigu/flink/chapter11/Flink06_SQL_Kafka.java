@@ -26,7 +26,7 @@ public class Flink06_SQL_Kafka {
                             " 'connector' = 'kafka', " +
                             "  'topic' = 's1', " +
                             "  'properties.bootstrap.servers' = 'hadoop162:9092', " +
-                            "  'properties.group.id' = 'atguigu', " +
+                            "  'properties.group.id' = 'testId', " +
                             "  'scan.startup.mode' = 'latest-offset', " +
                             "  'format' = 'csv' " +
                             ")");
